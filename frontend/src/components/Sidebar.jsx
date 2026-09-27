@@ -25,8 +25,8 @@ export default function Sidebar({ activePage, setActivePage, onOpenAuth, onOpenP
           <Shirt className="w-5 h-5 text-kahve-600" />
         </div>
         <div>
-          <h1 className="font-serif text-lg font-bold text-kahve-600 leading-tight">Bu Gün</h1>
-          <p className="text-[11px] font-semibold text-kahve-400 -mt-0.5">Ne Giysem?</p>
+          <h1 className="font-serif text-lg font-bold text-kahve-600 leading-tight">Şımarık</h1>
+          <p className="text-[11px] font-semibold text-kahve-400 -mt-0.5">AI Stil Danışmanın 💜</p>
         </div>
       </button>
 

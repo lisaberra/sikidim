@@ -1,23 +1,7 @@
-﻿import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Music, Sparkles, RefreshCw, CheckCircle2, Lock, Mic2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import BibbleCharacter from './BibbleCharacter';
-
-// Basit offline etiketleme (fallback)
-function detectMood(text) {
-  const lower = text.toLowerCase();
-  const moods = [
-    { keyword: 'rock', mood: 'Asi & Grunge', colors: ['Siyah', 'Kırmızı', 'Gri'], style: 'Grunge' },
-    { keyword: 'pop', mood: 'Canlı & Renkli', colors: ['Pembe', 'Sarı', 'Beyaz'], style: 'Casual' },
-    { keyword: 'slow', mood: 'Romantik', colors: ['Bordo', 'Krem', 'Pudra'], style: 'Şık' },
-    { keyword: 'jazz', mood: 'Klasik & Şık', colors: ['Siyah', 'Altın', 'Zümrüt'], style: 'Klasik' },
-    { keyword: 'indie', mood: 'Bohem', colors: ['Kahverengi', 'Hardal', 'Haki'], style: 'Bohem' }
-  ];
-  for (let { keyword, ...data } of moods) {
-    if (lower.includes(keyword)) return data;
-  }
-  return { mood: 'Sofistike', colors: ['Siyah', 'Beyaz', 'Bej'], style: 'Klasik' };
-}
 
 function getDateKey() {
   return new Date().toISOString().slice(0, 10);
@@ -39,7 +23,7 @@ export default function SarkinaGoreKombin({ wardrobe, combos = [], onAddCombo, A
   }, []);
 
   const [usedCount, setUsedCount] = useState(usageCount);
-  const maxUses = 5; // Limiti 5 yaptık
+  const maxUses = 5;
 
   const generate = async () => {
     if (!song.trim()) return;
@@ -53,29 +37,46 @@ export default function SarkinaGoreKombin({ wardrobe, combos = [], onAddCombo, A
     setResult(null);
 
     try {
-      const prompt = `Dinlediğim şu şarkının HİSSİYATINI, TÜRÜNÜ (pop, rock, indie vb.), DÖNEMİNİ ve SANATÇISININ STİLİNİ (temposunu, akor yapısını) detaylıca analiz et ve buna uygun derinlemesine bir kombin öner:\nŞarkı: "${song}"\nSanatçı: "${artist || 'Belirtilmedi'}"`;
+      const prompt = `Dinlediğim şu şarkının HİSSİYATINI, TÜRÜNÜ (pop, rock, indie vb.), DÖNEMİNİ ve SANATÇISININ STİLİNİ (temposunu, akor yapısını) detaylıca analiz et ve buna uygun derinlemesine bir kombin öner.
+
+ÖNEMLİ: Şarkının sözlerini, ritimini ve genel havasını (enerjik/melankolik/asi/romantik vb.) düşünerek GERÇEKTEN o şarkıyı dinlerken giyilebilecek bir kombin öner. Rastgele bir kombin YAPMA. Şarkının vibe'ına uymayan parça KOYMA.
+
+Şarkı: "${song}"
+Sanatçı: "${artist || 'Belirtilmedi'}"
+
+reasoning alanında şarkının stilini ve neden bu parçaları seçtiğini detaylıca anlat.`;
       
       const res = await fetch(`${API_URL}/api/recommend`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt, wardrobe: wardrobe }),
       });
-      if(!res.ok) throw new Error();
+      
+      if (!res.ok) {
+        const errText = await res.text().catch(() => '');
+        throw new Error(`API yanıt vermedi (${res.status}): ${errText.slice(0, 100)}`);
+      }
+      
       const data = await res.json();
       
-      const moodColors = data.color_palette && data.color_palette.length > 0 ? data.color_palette : ['Siyah', 'Beyaz'];
+      if (data.error) {
+        toast.error(`Bibble: ${data.error}`);
+        setLoading(false);
+        return;
+      }
       
       const combo = {
-        title: `🎵 ${song.slice(0, 20)} Kombini`,
+        title: data.title || `🎵 ${song.slice(0, 20)} Kombini`,
         top: data.top_item,
         bottom: data.bottom_item,
         shoes: data.shoes_item,
         outer: data.outer_item,
         accessory: data.accessory_item,
         mood: data.title || "Müzikal Vibe",
-        moodColors: moodColors,
+        moodColors: data.color_palette && data.color_palette.length > 0 ? data.color_palette : ['Siyah', 'Beyaz'],
         reasoning: data.reasoning,
-        bibbleMood: data.bibble_mood || 'cool'
+        bibbleMood: data.bibble_mood || 'cool',
+        style_tips: data.style_tips || [],
       };
 
       setResult(combo);
@@ -84,29 +85,9 @@ export default function SarkinaGoreKombin({ wardrobe, combos = [], onAddCombo, A
       localStorage.setItem('bng_song_combo_date', getDateKey());
       localStorage.setItem('bng_song_combo_count', newCount.toString());
       setUsedCount(newCount);
-    } catch (e) {
-      toast.error("Yapay zeka şu an şarkıyı analiz edemedi, basit mod kullanılıyor.");
-      const mood = detectMood(song + ' ' + artist);
-      const matchingItems = wardrobe.filter(item =>
-        mood.colors.includes(item.color) || item.style === mood.style
-      );
-      const pick = (cat) => {
-        const filtered = matchingItems.filter(i => i.category === cat || i.category === `${cat} Giyim`);
-        if (filtered.length === 0) return wardrobe.filter(i => i.category === cat || i.category === `${cat} Giyim`)[0] || null;
-        return filtered[Math.floor(Math.random() * filtered.length)];
-      };
-      
-      setResult({
-        title: `🎵 ${song.slice(0, 20)} Kombini`,
-        top: pick('Üst'), bottom: pick('Alt'), shoes: pick('Ayakkabı'), outer: pick('Dış'), accessory: pick('Aksesuar'),
-        mood: mood.mood, moodColors: mood.colors, reasoning: "Çevrimdışı mod: Basit etiket eşleştirme.",
-        bibbleMood: 'saskin'
-      });
-      
-      const newCount = usedCount + 1;
-      localStorage.setItem('bng_song_combo_date', getDateKey());
-      localStorage.setItem('bng_song_combo_count', newCount.toString());
-      setUsedCount(newCount);
+    } catch (err) {
+      console.error('Şarkı kombin hatası:', err);
+      toast.error(`Bağlantı hatası: ${err.message || 'Backend çalışıyor mu kontrol edin.'}`);
     }
     setLoading(false);
   };
@@ -119,7 +100,7 @@ export default function SarkinaGoreKombin({ wardrobe, combos = [], onAddCombo, A
           size="lg"
           flying={!result}
           showReaction={!!result}
-          reactionText={result ? 'Bu şarkının tarzı tam senlik!' : ''}
+          reactionText={result ? '🎵 Bu şarkının tarzı tam senlik!' : ''}
         />
         <div>
           <h2 className="font-serif text-3xl font-bold text-kahve-600 flex items-center gap-2">
@@ -213,7 +194,7 @@ export default function SarkinaGoreKombin({ wardrobe, combos = [], onAddCombo, A
                   </>
                 ) : (
                   <div className="aspect-square rounded-xl bg-cream border border-dashed border-kahve-200 flex items-center justify-center text-[10px] text-kahve-300">
-                    Eksik
+                    —
                   </div>
                 )}
               </div>
@@ -221,16 +202,37 @@ export default function SarkinaGoreKombin({ wardrobe, combos = [], onAddCombo, A
           </div>
 
           <div className="bg-purple-50/70 p-5 rounded-2xl border border-purple-200 shadow-inner">
-            <p className="text-sm text-kahve-700 italic font-medium flex gap-2">
-              <span className="text-xl">🎵</span> "{result.reasoning}"
+            <p className="text-sm font-extrabold text-purple-600 mb-2 uppercase tracking-wider flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4" /> Bibble'ın Müzik Analizi:
+            </p>
+            <p className="text-base text-kahve-700 italic font-medium leading-relaxed">
+              🎵 "{result.reasoning}"
             </p>
           </div>
+
+          {/* Stil Tüyoları */}
+          {result.style_tips && result.style_tips.length > 0 && (
+            <div className="bg-suyesil-50/50 p-4 rounded-2xl border border-suyesil-200">
+              <p className="text-[10px] font-bold text-suyesil-600 mb-2 uppercase tracking-wider">💡 Stil Tüyoları</p>
+              <ul className="space-y-1">
+                {result.style_tips.map((tip, i) => (
+                  <li key={i} className="text-xs text-kahve-600 font-medium">• {tip}</li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           <button
             onClick={() => {
               if (onAddCombo) {
                 onAddCombo({
                   title: result.title,
+                  top_item: result.top,
+                  bottom_item: result.bottom,
+                  shoes_item: result.shoes,
+                  outer_item: result.outer,
+                  accessory_item: result.accessory,
+                  reasoning: result.reasoning,
                   items: [result.top?.id, result.bottom?.id, result.shoes?.id, result.outer?.id, result.accessory?.id].filter(Boolean),
                   image: result.top?.image || result.top?.image_url,
                 });

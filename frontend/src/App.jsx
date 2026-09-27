@@ -20,7 +20,7 @@ import AuthModal from './components/AuthModal';
 import ProfileDrawer from './components/ProfileDrawer';
 import StilDanismani from './components/StilDanismani';
 
-const API_URL = import.meta.env.VITE_API_URL || window.location.origin;
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 const getDemoWardrobe = (gender) => {
   const isMale = gender === 'Erkek';

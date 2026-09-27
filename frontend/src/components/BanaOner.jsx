@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Sparkles, RefreshCw, CheckCircle2, MapPin } from 'lucide-react';
 import BibbleCharacter, { FloatingBibble } from './BibbleCharacter';
+import { toast } from 'react-hot-toast';
 
 const PRESETS = [
   'Kırmızı ve siyah tonlarında şık akşam yemeği',
@@ -13,7 +14,7 @@ const PRESETS = [
   'Bohem: toprak tonları, doğal kumaşlar',
 ];
 
-/* ═══ Türkiye 81 İl Koordinat Tablosu (Geocoding API fallback) ═══ */
+/* ═══ Türkiye 81 İl Koordinat Tablosu ═══ */
 const TR_CITIES = {
   'adana': { lat: 37.00, lon: 35.32 }, 'adıyaman': { lat: 37.76, lon: 38.28 },
   'afyon': { lat: 38.74, lon: 30.54 }, 'afyonkarahisar': { lat: 38.74, lon: 30.54 },
@@ -69,30 +70,26 @@ export default function BanaOner({ wardrobe, favorites = [], onAddCombo, onPrevi
   const [resolvedCityName, setResolvedCityName] = useState('');
   const [bibbleMood, setBibbleMood] = useState('idle');
 
-  // Hava durumunu çek — Open-Meteo + TR_CITIES fallback
+  // Hava durumunu çek
   useEffect(() => {
     const fetchWeather = async () => {
       if (!city.trim()) { setWeatherData(null); return; }
       setWeatherLoading(true);
       try {
-        // 1. Türkiye il tablosunda var mı kontrol et
         const cityLower = city.trim().toLowerCase().replace(/İ/g, 'i').replace(/I/g, 'ı');
         const trCity = TR_CITIES[cityLower];
         
         let latitude, longitude, resolvedName;
 
         if (trCity) {
-          // Direkt koordinat kullan
           latitude = trCity.lat;
           longitude = trCity.lon;
           resolvedName = city.trim();
         } else {
-          // 2. Geocoding API ile ara (TR öncelikli, sonra global)
           const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city.trim())}&count=3&language=tr&format=json`);
           const geoData = await geoRes.json();
 
           if (!geoData.results || geoData.results.length === 0) {
-            // İngilizce ile tekrar dene
             const geoResEN = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city.trim())}&count=3&language=en&format=json`);
             const geoDataEN = await geoResEN.json();
             
@@ -114,7 +111,6 @@ export default function BanaOner({ wardrobe, favorites = [], onAddCombo, onPrevi
 
         setResolvedCityName(resolvedName);
 
-        // 3. Hava durumunu çek
         const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`);
         const json = await weatherRes.json();
         const cw = json.current_weather;
@@ -164,68 +160,33 @@ export default function BanaOner({ wardrobe, favorites = [], onAddCombo, onPrevi
           recent_combos: recentCombos
         }),
       });
-      if (!res.ok) throw new Error("API Offline");
+      
+      if (!res.ok) {
+        const errText = await res.text().catch(() => '');
+        throw new Error(`API yanıt vermedi (${res.status}): ${errText.slice(0, 100)}`);
+      }
+      
       const data = await res.json();
-      if (data.error) throw new Error(data.error);
+      
+      if (data.error) {
+        toast.error(`Bibble: ${data.error}`);
+        setBibbleMood('kizgin');
+        setLoading(false);
+        return;
+      }
+      
       setResult(data);
       setBibbleMood(data.bibble_mood || 'mutlu');
       if (data.top_item || data.bottom_item) {
         onPreview([data.top_item, data.bottom_item, data.outer_item, data.shoes_item, data.accessory_item].filter(Boolean));
       }
-    } catch {
-      /* Offline fallback */
-      const normalize = (str) => (str || '').toLowerCase();
-      const promptWords = prompt.toLowerCase().split(/\s+/).filter(Boolean);
-
-      const scoreItem = (item) => {
-        let score = 0;
-        const nameWords = item.name.toLowerCase().split(/\s+/);
-        const color = normalize(item.color);
-
-        promptWords.forEach(pw => {
-          if (nameWords.some(nw => nw.includes(pw) || pw.includes(nw))) score += 5;
-          if (color.includes(pw) || pw.includes(color)) score += 6;
-        });
-        return score;
-      };
-
-      const pickBest = (cat) => {
-        const items = wardrobe.filter(i => i.category === cat || i.category === `${cat} Giyim`);
-        if (items.length === 0) return null;
-        items.sort((a, b) => scoreItem(b) - scoreItem(a));
-        return items[0];
-      };
-
-      const top = pickBest('Üst');
-      const bot = pickBest('Alt');
-      const outer = pickBest('Dış');
-      const shoe = pickBest('Ayakkabı');
-      const acc = pickBest('Aksesuar');
-
-      setResult({
-        title: 'Bibble Offline Kombini',
-        top_item: top, bottom_item: bot, outer_item: outer, shoes_item: shoe, accessory_item: acc,
-        reasoning: 'Yapay zeka motoru çevrimdışı olduğu için en uygun eşleştirme yapıldı.',
-        compatibility_score: Math.floor(Math.random() * 15) + 80,
-        bibble_mood: 'saskin',
-        style_tips: ['Aksesuarlarla tarzınızı vurgulayın.'],
-      });
-      setBibbleMood('saskin');
-      onPreview([top, bot, outer, shoe, acc].filter(Boolean));
+    } catch (err) {
+      console.error('Bibble API Error:', err);
+      toast.error(`Bibble bağlantı hatası: ${err.message || 'Backend çalışıyor mu kontrol edin.'}`);
+      setBibbleMood('kizgin');
     }
     setLoading(false);
   };
-
-  // Bibble mood görseli
-  const bibbleMoodImage = useMemo(() => {
-    const map = {
-      mutlu: '/bibble/bibble2.jpg', saskin: '/bibble/bibble3.jpg',
-      havali: '/bibble/bibble1.jpg', heyecanli: '/bibble/bibble2.jpg',
-      kizgin: '/bibble/bibble3.jpg', romantik: '/bibble/bibble2.jpg',
-      idle: '/bibble/bibble1.jpg',
-    };
-    return map[bibbleMood] || '/bibble/bibble1.jpg';
-  }, [bibbleMood]);
 
   return (
     <div className="space-y-6 animate-fade-in max-w-4xl mx-auto relative">
@@ -358,7 +319,7 @@ export default function BanaOner({ wardrobe, favorites = [], onAddCombo, onPrevi
                   </>
                 ) : (
                   <div className="aspect-square rounded-xl bg-cream border-2 border-dashed border-kahve-100 flex items-center justify-center text-xs font-medium text-kahve-300">
-                    Eksik
+                    —
                   </div>
                 )}
               </div>

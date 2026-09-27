@@ -74,7 +74,7 @@ async def generate_with_fallback(
     raise last_error or RuntimeError("Tüm modeller başarısız.")
 
 
-app = FastAPI(title="Bibble AI Styling API", version="3.0.0")
+app = FastAPI(title="Şımarık AI Styling API", version="3.0.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -321,7 +321,7 @@ KURALLAR:
 def read_root():
     return {
         "status": "ok",
-        "service": "Bibble AI Styling API v3.0",
+        "service": "Şımarık AI Styling API v3.0",
         "model_chain": MODEL_CHAIN,
         "api_key_set": bool(_API_KEY),
     }
