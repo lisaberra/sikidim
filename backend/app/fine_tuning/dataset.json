@@ -1,0 +1,17 @@
+[
+  {
+    "instruction": "Sen 'Bu Gün Ne Giysem' akıllı gardrop asistanısın. Kullanıcının sunduğu gardrop parçalarını, hava durumunu ve etkinlik konseptini analiz ederek renk tekerleği kurallarına uygun şık bir kombin öner.",
+    "input": "Prompt: 'Şık ve profesyonel bir iş yemeğine gidiyorum, hava 19 derece.' Gardrop parçaları: ['Pudra İpek Gömlek', 'Vizon Klasik Kumaş Pantolon', 'Bebek Mavisi Blazer Ceket', 'Taba Deri Stiletto', 'Su Yeşili İpek Eşarp']",
+    "output": "{\n  \"title\": \"Şık İş Yemeği Pasteli\",\n  \"top\": \"Pudra İpek Gömlek\",\n  \"bottom\": \"Vizon Klasik Kumaş Pantolon\",\n  \"outer\": \"Bebek Mavisi Blazer Ceket\",\n  \"shoes\": \"Taba Deri Stiletto\",\n  \"accessory\": \"Su Yeşili İpek Eşarp\",\n  \"compatibility_score\": 96,\n  \"reasoning\": \"Pudra pembe gömlek ile vizon kumaş pantolon ton-sür-ton bir zarafet sunar. Bebek mavisi blazer ceket kombinize sofistike bir kontrast katarken taba stiletto ayakkabı kahve tonlarıyla bütünlük sağlar.\",\n  \"style_tips\": [\n    \"Gömlek yakasını hafif açık bırakarak ipek eşarpla zenginleştirin.\",\n    \"Vizon pantolonun beline taba deri kemer takabilirsiniz.\"\n  ]\n}"
+  },
+  {
+    "instruction": "Sen 'Bu Gün Ne Giysem' akıllı gardrop asistanısın. Kullanıcının sunduğu gardrop parçalarını, hava durumunu ve etkinlik konseptini analiz ederek renk tekerleği kurallarına uygun şık bir kombin öner.",
+    "input": "Prompt: 'Yağmurlu ve 14 derece bir sonbahar gününde arkadaşlarımla kahve içmeye gidiyorum.' Gardrop parçaları: ['Ekru Örgü Kazak', 'Yüksek Bel Jean', 'Kahverengi Süet Trençkot', 'Siyah Deri Bot', 'Pudra Beanie Şapka']",
+    "output": "{\n  \"title\": \"Sonbahar Kahve Şıklığı\",\n  \"top\": \"Ekru Örgü Kazak\",\n  \"bottom\": \"Yüksek Bel Jean\",\n  \"outer\": \"Kahverengi Süet Trençkot\",\n  \"shoes\": \"Siyah Deri Bot\",\n  \"accessory\": \"Pudra Beanie Şapka\",\n  \"compatibility_score\": 94,\n  \"reasoning\": \"Ekru örgü kazak sıcak bir doku sunarken, kahverengi süet trençkot yağmurlu sonbahar havasına mükemmel uyum sağlar. Pudra bereli aksesuar pastel bir dokunuş ekler.\",\n  \"style_tips\": [\n    \"Trençkotun kuşağını arkada bağlayarak salaş bir şıklık yakalayın.\",\n    \"Kazağın önünü jean içine hafifçe sokun.\"\n  ]\n}"
+  },
+  {
+    "instruction": "Sen 'Bu Gün Ne Giysem' akıllı gardrop asistanısın. Kullanıcının sunduğu gardrop parçalarını, hava durumunu ve etkinlik konseptini analiz ederek renk tekerleği kurallarına uygun şık bir kombin öner.",
+    "input": "Prompt: 'Pazar günü sahil yürüyüşü ve brunch için rahat spor kombin.' Gardrop parçaları: ['Su Yeşili Oversize Tişört', 'Beyaz Jogger Pantolon', 'Bebek Mavisi Denim Ceket', 'Beyaz Chunky Sneaker', 'Güneş Gözlüğü']",
+    "output": "{\n  \"title\": \"Fresh Sahil Brunchı\",\n  \"top\": \"Su Yeşili Oversize Tişört\",\n  \"bottom\": \"Beyaz Jogger Pantolon\",\n  \"outer\": \"Bebek Mavisi Denim Ceket\",\n  \"shoes\": \"Beyaz Chunky Sneaker\",\n  \"accessory\": \"Güneş Gözlüğü\",\n  \"compatibility_score\": 98,\n  \"reasoning\": \"Su yeşili ve bebek mavisi denim birlikteliği ilkbahar tazeliğini simgeler. Beyaz jogger ve sneaker yürüyüş için maksiumum konfor sunar.\",\n  \"style_tips\": [\n    \"Denim ceketin kollarını dirseğe kadar katlayabilirsiniz.\",\n    \"Açık renk tonlarını tamamlamak için pastel çanta tercih edin.\"\n  ]\n}"
+  }
+]

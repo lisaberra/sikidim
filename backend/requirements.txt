@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+python-multipart
+rembg[cpu]
+Pillow
+numpy
+pydantic
+google-genai
+python-dotenv
+opencv-python
