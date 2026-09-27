@@ -20,11 +20,13 @@
 2. Gerekli kütüphaneleri yükleyin: `pip install -r requirements.txt`
 3. `.env` dosyası oluşturup içine `GEMINI_API_KEY` değişkeninizi ekleyin.
 4. Sunucuyu başlatın: `uvicorn main:app --reload`
+5. **API Dokümantasyonu:** Sunucu çalıştıktan sonra [http://localhost:8000/docs](http://localhost:8000/docs) adresinden backend'e ulaşabilirsiniz.
 
 ### Frontend (React / Vite)
 1. `frontend` klasörüne gidin.
 2. Bağımlılıkları yükleyin: `npm install`
 3. Geliştirme sunucusunu başlatın: `npm run dev`
+4. **Uygulama Arayüzü:** Uygulama başladığında [http://localhost:5173](http://localhost:5173) adresine giderek arayüzü görüntüleyebilirsiniz.
 
 ---
 *Bu proje lisaberra tarafından geliştirilmektedir.*
